@@ -1,5 +1,5 @@
 # Foodie-Fi_CaseStudy
-
+```sql
 --A. Customer Journey
 --Based off the 8 sample customers provided in the sample from the subscriptions table, write a brief description about each customer’s onboarding journey.
 SELECT customer_id, p.plan_id, start_date, plan_name
@@ -384,3 +384,4 @@ WINDOW w AS (
   PARTITION BY output.customer_id
   ORDER BY payment_date, customer_id
 );
+```
