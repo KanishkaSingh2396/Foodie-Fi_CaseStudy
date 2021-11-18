@@ -1,5 +1,5 @@
 # Foodie-Fi_CaseStudy
-```sql
+
 --A. Customer Journey
 --Based off the 8 sample customers provided in the sample from the subscriptions table, write a brief description about each customer’s onboarding journey.
 ```sql
@@ -9,15 +9,18 @@ join foodie_fi.plans p
 on s.plan_id = p.plan_id
 order by customer_id, plan_id, start_date
 ```
+![image](https://user-images.githubusercontent.com/89623051/142484639-02fb4f7a-d3fa-4140-a990-0f05be9d7400.png)
 
 --Part B: Data Analysis Questions
 
---Question 1 How many customers has Foodie-Fi ever had?
+Question 1 How many customers has Foodie-Fi ever had?
+
 ```sql
 select count(distinct customer_id) from foodie_fi.subscriptions
 ```
+![image](https://user-images.githubusercontent.com/89623051/142484773-4293e10e-2c48-4ec9-8612-bb64ee8ee931.png)
 
---Question 2 What is the monthly distribution of trial plan start_date values for our dataset - use the start of the month as the group by value
+Question 2 What is the monthly distribution of trial plan start_date values for our dataset - use the start of the month as the group by value
 
 ```sql
 select
@@ -28,7 +31,9 @@ where plan_id = 0
 group by month_start_date
 order by month_start_date
 ``` 
---Question 3 What plan start_date values occur after the year 2020 for our dataset? Show the breakdown by count of events for each plan_name
+![image](https://user-images.githubusercontent.com/89623051/142485000-a0ea1814-2798-478e-97c0-ea1c2861b758.png)
+
+Question 3 What plan start_date values occur after the year 2020 for our dataset? Show the breakdown by count of events for each plan_name
 
 ```sql
 select  
@@ -42,8 +47,10 @@ where start_date >= '2021-01-01'
 group by p.plan_id, plan_name
 order by p.plan_id asc
 ``` 
+![image](https://user-images.githubusercontent.com/89623051/142485133-87246a7d-ea46-4f07-a718-1aa43d56c3a4.png)
 
---Question 4 What is the customer count and percentage of customers who have churned rounded to 1 decimal place?
+
+Question 4 What is the customer count and percentage of customers who have churned rounded to 1 decimal place?
 
 ```sql
 with base_tb as(
@@ -59,8 +66,10 @@ from foodie_fi.subscriptions)
 select total_count, churn_count, round(100*(churn_count::numeric/total_count::numeric),1) as churn_percentage
 from base_tb; 
 ```
+![image](https://user-images.githubusercontent.com/89623051/142485362-cb7aee3e-a786-4472-bbee-4b17a8e1d605.png)
 
---Question 5 How many customers have churned straight after their initial free trial - what percentage is this rounded to 1 decimal place?
+
+Question 5 How many customers have churned straight after their initial free trial - what percentage is this rounded to 1 decimal place?
 
 ```sql
 with base as(
@@ -71,8 +80,9 @@ count(case when plan_id = 4 then 1 end) as free_trial_churn,
 round(100*(count(case when plan_id = 4 then 1 end)::numeric/count(*)::numeric),2) as churn_percentage
 from base where rank_plan = 2
 ```
+![image](https://user-images.githubusercontent.com/89623051/142485466-394be342-71be-4a18-8214-e56f39b1de6a.png)
 
---6. What is the number and percentage of customer plans after their initial free trial?
+6. What is the number and percentage of customer plans after their initial free trial?
 
 ```sql
 WITH ranked_plans AS (
@@ -88,6 +98,7 @@ WHERE plan_rank = 2
 GROUP BY plans.plan_id, plans.plan_name
 ORDER BY plans.plan_id;
 ```
+![image](https://user-images.githubusercontent.com/89623051/142485681-e3812bbd-c5de-4de9-b57f-fca98248843a.png)
 
 --7. What is the customer count and percentage breakdown of all 5 plan_name values at 2020-12-31?
 
@@ -112,8 +123,9 @@ select plan_id, count(*)as customers, round(100*COUNT(*) / SUM(COUNT(*)) OVER ()
 from summarised_tb 
 group by plan_id
 ```
+![image](https://user-images.githubusercontent.com/89623051/142485836-50a4f90b-f275-40c2-ae9f-b540126f9197.png)
 
---Question 8 How many customers have upgraded to an annual plan in 2020?
+Question 8 How many customers have upgraded to an annual plan in 2020?
 
 ```sql
 WITH valid_subscriptions AS (
@@ -130,6 +142,7 @@ WITH valid_subscriptions AS (
 )
 select count(*) as annual_customers from valid_subscriptions where plan_rank = 1
 ```
+![image](https://user-images.githubusercontent.com/89623051/142486014-2ede96da-8f45-41e7-843f-b98b8c6b2d4a.png)
 
 --Question 9 How many days on average does it take for a customer to an annual plan from the day they join Foodie-Fi?
 
@@ -145,8 +158,9 @@ where plan_id in(0,3))
 
 select ceiling(avg(lead_start_date - start_date)) as avg_days from base where lead_start_date is not null
 ```
+![image](https://user-images.githubusercontent.com/89623051/142486167-c53a4409-d96a-4d6e-ba8e-138162da0baf.png)
 
-----Question 11 How many customers downgraded from a pro monthly to a basic monthly plan in 2020? downgraded from 2 to 1
+Question 11 How many customers downgraded from a pro monthly to a basic monthly plan in 2020? downgraded from 2 to 1
 
 ```sql
 with base as (select 
@@ -160,6 +174,8 @@ where extract(year from start_date) = 2020)
 
 select count(*) from base where lead_plan_id is not null and lead_plan_id = 2 and plan_id = 1
 ```
+![image](https://user-images.githubusercontent.com/89623051/142486289-9f6a1666-d2e0-4b39-9164-3c80d4ca0533.png)
+
 -------------------------------------
 Question 10 Can you further breakdown this average value into 30 day periods (i.e. 0-30 days, 31-60 days etc)
 
@@ -220,15 +236,17 @@ join interval
 on tb1.month_interval = interval.month_interval
 ```sql
 
+![image](https://user-images.githubusercontent.com/89623051/142486674-2d2197bd-e6ed-4f6b-b9ea-04f24881172e.png)
+
 ----------------------------------------------------------------------------------
 Part B Challenge Payment Question
 ----------------------------------------------------------------------------------
 
---The Foodie-Fi team wants you to create a new payments table for the year 2020 that includes amounts paid by each customer in the subscriptions table with the following requirements:
---monthly payments always occur on the same day of month as the original start_date of any monthly paid plan
---upgrades from basic to monthly or pro plans are reduced by the current paid amount in that month and start immediately
---upgrades from pro monthly to pro annual are paid at the end of the current billing period and also starts at the end of the month period
---once a customer churns they will no longer make payments
+The Foodie-Fi team wants you to create a new payments table for the year 2020 that includes amounts paid by each customer in the subscriptions table with the following requirements:
+monthly payments always occur on the same day of month as the original start_date of any monthly paid plan
+upgrades from basic to monthly or pro plans are reduced by the current paid amount in that month and start immediately
+upgrades from pro monthly to pro annual are paid at the end of the current billing period and also starts at the end of the month period
+once a customer churns they will no longer make payments
 
 ```sql
 with base as (
@@ -240,6 +258,7 @@ from base )
 
 select plan_id, lead_plan_id, count(*) from lead_plans group by plan_id, lead_plan_id ORDER BY plan_id, lead_plan_id;
 ```
+![image](https://user-images.githubusercontent.com/89623051/142486899-af18135f-52be-4388-a467-2daa7c43953b.png)
 
 -------------------------------------------
 -- case 1: non churn monthly customers
@@ -280,6 +299,8 @@ WINDOW w AS (
   ORDER BY payment_date, customer_id
 );
 ```
+![image](https://user-images.githubusercontent.com/89623051/142487290-1bc14046-67df-44f1-aef8-8d7c8aa18fc4.png)
+
 -------------------------------------
 --case 2 churn customers
 
@@ -322,6 +343,7 @@ WINDOW w AS (
   ORDER BY payment_date, customer_id
 );
 ```
+![image](https://user-images.githubusercontent.com/89623051/142487467-d5a91175-e7f0-4d27-aae1-193b0e1e05c1.png)
 
 -- case 3: customers who move from basic to pro plans
 
@@ -358,6 +380,9 @@ WINDOW w AS (
   ORDER BY payment_date, customer_id
 );
 ```
+
+![image](https://user-images.githubusercontent.com/89623051/142487611-d874000d-1a1f-4e65-baab-377638730f34.png)
+
 ---------------------------------------------
 --case 4: pro monthly customers who move up to annual plans
 
@@ -393,6 +418,7 @@ WINDOW w AS (
   ORDER BY payment_date, customer_id
 );
 ```
+![image](https://user-images.githubusercontent.com/89623051/142487735-e76216be-60b3-4c30-9f6e-020412b3ca9e.png)
 
 ----------------------------------------------------
 --case 5: annual_pro_payments, id = 3
@@ -430,3 +456,4 @@ WINDOW w AS (
   ORDER BY payment_date, customer_id
 );
 ```
+![image](https://user-images.githubusercontent.com/89623051/142487892-19302adb-8a8d-49c6-af2e-590ca7bf75e5.png)
