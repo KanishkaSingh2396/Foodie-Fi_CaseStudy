@@ -2,19 +2,24 @@
 ```sql
 --A. Customer Journey
 --Based off the 8 sample customers provided in the sample from the subscriptions table, write a brief description about each customer’s onboarding journey.
+```sql
 SELECT customer_id, p.plan_id, start_date, plan_name
 FROM foodie_fi.subscriptions s
 join foodie_fi.plans p
 on s.plan_id = p.plan_id
 order by customer_id, plan_id, start_date
-
+```
 
 --Part B: Data Analysis Questions
 
 --Question 1 How many customers has Foodie-Fi ever had?
+```sql
 select count(distinct customer_id) from foodie_fi.subscriptions
+```
 
 --Question 2 What is the monthly distribution of trial plan start_date values for our dataset - use the start of the month as the group by value
+
+```sql
 select
   DATE_TRUNC('MONTH', start_date) as month_start_date,
   count(plan_id)
@@ -22,8 +27,10 @@ from foodie_fi.subscriptions
 where plan_id = 0
 group by month_start_date
 order by month_start_date
- 
+``` 
 --Question 3 What plan start_date values occur after the year 2020 for our dataset? Show the breakdown by count of events for each plan_name
+
+```sql
 select  
   p.plan_id,
   plan_name,
@@ -34,9 +41,11 @@ join foodie_fi.plans p
 where start_date >= '2021-01-01'
 group by p.plan_id, plan_name
 order by p.plan_id asc
- 
+``` 
 
 --Question 4 What is the customer count and percentage of customers who have churned rounded to 1 decimal place?
+
+```sql
 with base_tb as(
 select 
   count(case
@@ -49,8 +58,11 @@ from foodie_fi.subscriptions)
 
 select total_count, churn_count, round(100*(churn_count::numeric/total_count::numeric),1) as churn_percentage
 from base_tb; 
+```
 
 --Question 5 How many customers have churned straight after their initial free trial - what percentage is this rounded to 1 decimal place?
+
+```sql
 with base as(
 select customer_id, start_date, plan_id, row_number() over(partition by customer_id order by plan_id asc) as rank_plan
 from foodie_fi.subscriptions)
@@ -58,8 +70,11 @@ select
 count(case when plan_id = 4 then 1 end) as free_trial_churn,
 round(100*(count(case when plan_id = 4 then 1 end)::numeric/count(*)::numeric),2) as churn_percentage
 from base where rank_plan = 2
+```
 
 --6. What is the number and percentage of customer plans after their initial free trial?
+
+```sql
 WITH ranked_plans AS (
   SELECT customer_id, plan_id,ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY plan_id asc) AS plan_rank
   FROM foodie_fi.subscriptions)
@@ -72,8 +87,11 @@ INNER JOIN foodie_fi.plans
 WHERE plan_rank = 2
 GROUP BY plans.plan_id, plans.plan_name
 ORDER BY plans.plan_id;
+```
 
 --7. What is the customer count and percentage breakdown of all 5 plan_name values at 2020-12-31?
+
+```sql
 WITH valid_subscriptions AS (
   SELECT
     customer_id,
@@ -93,8 +111,11 @@ select* from valid_subscriptions where plan_rank = 1)
 select plan_id, count(*)as customers, round(100*COUNT(*) / SUM(COUNT(*)) OVER (),1) as percentage
 from summarised_tb 
 group by plan_id
+```
 
 --Question 8 How many customers have upgraded to an annual plan in 2020?
+
+```sql
 WITH valid_subscriptions AS (
   SELECT
     customer_id,
@@ -108,10 +129,12 @@ WITH valid_subscriptions AS (
   WHERE start_date <= '2020-12-31' and start_date >= '2020-01-01' and plan_id = 3
 )
 select count(*) as annual_customers from valid_subscriptions where plan_rank = 1
+```
 
 --Question 9 How many days on average does it take for a customer to an annual plan from the day they join Foodie-Fi?
 
---with base as (
+```sql
+with base as (
 select 
   customer_id, 
   plan_id, 
@@ -121,9 +144,11 @@ from foodie_fi.subscriptions
 where plan_id in(0,3))
 
 select ceiling(avg(lead_start_date - start_date)) as avg_days from base where lead_start_date is not null
+```
 
-----Question 11 How many customers downgraded from a pro monthly to a basic monthly plan in 2020?
---downgraded from 2 to 1
+----Question 11 How many customers downgraded from a pro monthly to a basic monthly plan in 2020? downgraded from 2 to 1
+
+```sql
 with base as (select 
   customer_id, 
   plan_id, 
@@ -134,10 +159,11 @@ from foodie_fi.subscriptions
 where extract(year from start_date) = 2020)
 
 select count(*) from base where lead_plan_id is not null and lead_plan_id = 2 and plan_id = 1
-
+```
 -------------------------------------
 Question 10 Can you further breakdown this average value into 30 day periods (i.e. 0-30 days, 31-60 days etc)
 
+```sql
 CREATE Temp TABLE interval(
    month_interval int,
    breakdown_period varchar)
@@ -192,14 +218,19 @@ select breakdown_period, customers
 from tb1
 join interval
 on tb1.month_interval = interval.month_interval
+```sql
+
 ----------------------------------------------------------------------------------
--- Part BChallenge Payment Question
+Part B Challenge Payment Question
 ----------------------------------------------------------------------------------
+
 --The Foodie-Fi team wants you to create a new payments table for the year 2020 that includes amounts paid by each customer in the subscriptions table with the following requirements:
 --monthly payments always occur on the same day of month as the original start_date of any monthly paid plan
 --upgrades from basic to monthly or pro plans are reduced by the current paid amount in that month and start immediately
 --upgrades from pro monthly to pro annual are paid at the end of the current billing period and also starts at the end of the month period
 --once a customer churns they will no longer make payments
+
+```sql
 with base as (
 select* from foodie_fi.subscriptions where plan_id != 0 and  date_part ('year', start_date) = 2020 order by customer_id, start_date),
 lead_plans as(select*, 
@@ -208,9 +239,12 @@ lead_plans as(select*,
 from base )
 
 select plan_id, lead_plan_id, count(*) from lead_plans group by plan_id, lead_plan_id ORDER BY plan_id, lead_plan_id;
+```
 
 -------------------------------------------
 -- case 1: non churn monthly customers
+
+```sql
 WITH lead_plans AS (
 SELECT customer_id,plan_id,start_date,
   LEAD(plan_id) OVER (PARTITION BY customer_id ORDER BY start_date) AS lead_plan_id,
@@ -245,8 +279,11 @@ WINDOW w AS (
   PARTITION BY output.customer_id
   ORDER BY payment_date, customer_id
 );
+```
 -------------------------------------
 --case 2 churn customers
+
+```sql
 WITH lead_plans AS (
 SELECT customer_id,plan_id,start_date,
   LEAD(plan_id) OVER (PARTITION BY customer_id ORDER BY start_date) AS lead_plan_id,
@@ -284,8 +321,11 @@ WINDOW w AS (
   PARTITION BY output.customer_id
   ORDER BY payment_date, customer_id
 );
+```
+
 -- case 3: customers who move from basic to pro plans
---basic = 1, pro = 2,3 
+
+```sql
 WITH lead_plans AS (
 SELECT customer_id,plan_id,start_date,
   LEAD(plan_id) OVER (PARTITION BY customer_id ORDER BY start_date) AS lead_plan_id,
@@ -317,9 +357,12 @@ WINDOW w AS (
   PARTITION BY output.customer_id
   ORDER BY payment_date, customer_id
 );
-
+```
 ---------------------------------------------
 --case 4: pro monthly customers who move up to annual plans
+
+
+```sql
 WITH lead_plans AS (
 SELECT customer_id,plan_id,start_date,
   LEAD(plan_id) OVER (PARTITION BY customer_id ORDER BY start_date) AS lead_plan_id,
@@ -349,10 +392,12 @@ WINDOW w AS (
   PARTITION BY output.customer_id
   ORDER BY payment_date, customer_id
 );
-
+```
 
 ----------------------------------------------------
 --case 5: annual_pro_payments, id = 3
+
+```sql
 WITH lead_plans AS (
 SELECT customer_id,plan_id,start_date,
   LEAD(plan_id) OVER (PARTITION BY customer_id ORDER BY start_date) AS lead_plan_id,
