@@ -1,7 +1,101 @@
 # Foodie-Fi_CaseStudy
 
---A. Customer Journey
---Based off the 8 sample customers provided in the sample from the subscriptions table, write a brief description about each customer’s onboarding journey.
+![image](https://user-images.githubusercontent.com/89623051/143559331-9ba02bde-aea1-4479-bb5b-e7f721283211.png)
+
+### Introduction
+
+Subscription based businesses are super popular and Danny realised that there was a large gap in the market - he wanted to create a new streaming service that only had food related content - something like Netflix but with only cooking shows!
+
+Danny finds a few smart friends to launch his new startup Foodie-Fi in 2020 and started selling monthly and annual subscriptions, giving their customers unlimited on-demand access to exclusive food videos from around the world!
+
+Danny created Foodie-Fi with a data driven mindset and wanted to ensure all future investment decisions and new features were decided using data. This case study focuses on using subscription style digital data to answer important business questions.
+
+### Available Data
+
+Danny has shared the data design for Foodie-Fi and also short descriptions on each of the database tables - our case study focuses on only 2 tables but there will be a challenge to create a new table for the Foodie-Fi team.
+
+All datasets exist within the foodie_fi database schema - be sure to include this reference within your SQL scripts as you start exploring the data and answering the case study questions.
+
+### Entity Relationship Diagram
+
+![image](https://user-images.githubusercontent.com/89623051/143559451-5d974d5f-eb40-4e26-bfe6-e5b1ee00d808.png)
+
+### Datasets
+
+### Table 1: plans
+
+Customers can choose which plans to join Foodie-Fi when they first sign up.
+
+Basic plan customers have limited access and can only stream their videos and is only available monthly at $9.90
+
+Pro plan customers have no watch time limits and are able to download videos for offline viewing. Pro plans start at $19.90 a month or $199 for an annual subscription.
+
+Customers can sign up to an initial 7 day free trial will automatically continue with the pro monthly subscription plan unless they cancel, downgrade to basic or upgrade to an annual pro plan at any point during the trial.
+
+When customers cancel their Foodie-Fi service - they will have a churn plan record with a null price but their plan will continue until the end of the billing period.
+
+![image](https://user-images.githubusercontent.com/89623051/143559643-b1b37dfc-cbc5-4af0-994e-862918def94e.png)
+
+### Table 2: subscriptions
+
+Customer subscriptions show the exact date where their specific plan_id starts.
+
+If customers downgrade from a pro plan or cancel their subscription - the higher plan will remain in place until the period is over - the start_date in the subscriptions table will reflect the date that the actual plan changes.
+
+When customers upgrade their account from a basic plan to a pro or annual pro plan - the higher plan will take effect straightaway.
+
+When customers churn - they will keep their access until the end of their current billing period but the start_date will be technically the day they decided to cancel their service.
+
+![image](https://user-images.githubusercontent.com/89623051/143559754-e71bab2c-eb67-4c6e-94fa-251fc453b0df.png)
+
+### Case Study Questions
+
+This case study is split into an initial data understanding question before diving straight into data analysis questions before finishing with 1 single extension challenge.
+
+### A. Customer Journey
+
+Based off the 8 sample customers provided in the sample from the subscriptions table, write a brief description about each customer’s onboarding journey.
+
+Try to keep it as short as possible - you may also want to run some sort of join to make your explanations a bit easier!
+
+### B. Data Analysis Questions
+
+How many customers has Foodie-Fi ever had?
+What is the monthly distribution of trial plan start_date values for our dataset - use the start of the month as the group by value
+What plan start_date values occur after the year 2020 for our dataset? Show the breakdown by count of events for each plan_name
+What is the customer count and percentage of customers who have churned rounded to 1 decimal place?
+How many customers have churned straight after their initial free trial - what percentage is this rounded to the nearest whole number?
+What is the number and percentage of customer plans after their initial free trial?
+What is the customer count and percentage breakdown of all 5 plan_name values at 2020-12-31?
+How many customers have upgraded to an annual plan in 2020?
+How many days on average does it take for a customer to an annual plan from the day they join Foodie-Fi?
+Can you further breakdown this average value into 30 day periods (i.e. 0-30 days, 31-60 days etc)
+How many customers downgraded from a pro monthly to a basic monthly plan in 2020?
+
+### C. Challenge Payment Question
+
+The Foodie-Fi team wants you to create a new payments table for the year 2020 that includes amounts paid by each customer in the subscriptions table with the following requirements:
+
+monthly payments always occur on the same day of month as the original start_date of any monthly paid plan
+upgrades from basic to monthly or pro plans are reduced by the current paid amount in that month and start immediately
+upgrades from pro monthly to pro annual are paid at the end of the current billing period and also starts at the end of the month period
+once a customer churns they will no longer make payments
+
+
+### D. Outside The Box Questions
+
+The following are open ended questions which might be asked during a technical interview for this case study - there are no right or wrong answers, but answers that make sense from both a technical and a business perspective make an amazing impression!
+
+How would you calculate the rate of growth for Foodie-Fi?
+What key metrics would you recommend Foodie-Fi management to track over time to assess performance of their overall business?
+What are some key customer journeys or experiences that you would analyse further to improve customer retention?
+If the Foodie-Fi team were to create an exit survey shown to customers who wish to cancel their subscription, what questions would you include in the survey?
+What business levers could the Foodie-Fi team use to reduce the customer churn rate? How would you validate the effectiveness of your ideas?
+
+### Case Study Solution
+
+### A. Customer Journey
+##### Based off the 8 sample customers provided in the sample from the subscriptions table, write a brief description about each customer’s onboarding journey.
 ```sql
 SELECT customer_id, p.plan_id, start_date, plan_name
 FROM foodie_fi.subscriptions s
@@ -11,16 +105,16 @@ order by customer_id, plan_id, start_date
 ```
 ![image](https://user-images.githubusercontent.com/89623051/142484639-02fb4f7a-d3fa-4140-a990-0f05be9d7400.png)
 
---Part B: Data Analysis Questions
+### Part B: Data Analysis Questions
 
-Question 1 How many customers has Foodie-Fi ever had?
+##### Question 1 How many customers has Foodie-Fi ever had?
 
 ```sql
 select count(distinct customer_id) from foodie_fi.subscriptions
 ```
 ![image](https://user-images.githubusercontent.com/89623051/142484773-4293e10e-2c48-4ec9-8612-bb64ee8ee931.png)
 
-Question 2 What is the monthly distribution of trial plan start_date values for our dataset - use the start of the month as the group by value
+##### Question 2 What is the monthly distribution of trial plan start_date values for our dataset - use the start of the month as the group by value
 
 ```sql
 select
@@ -33,7 +127,7 @@ order by month_start_date
 ``` 
 ![image](https://user-images.githubusercontent.com/89623051/142485000-a0ea1814-2798-478e-97c0-ea1c2861b758.png)
 
-Question 3 What plan start_date values occur after the year 2020 for our dataset? Show the breakdown by count of events for each plan_name
+##### Question 3 What plan start_date values occur after the year 2020 for our dataset? Show the breakdown by count of events for each plan_name
 
 ```sql
 select  
@@ -50,7 +144,7 @@ order by p.plan_id asc
 ![image](https://user-images.githubusercontent.com/89623051/142485133-87246a7d-ea46-4f07-a718-1aa43d56c3a4.png)
 
 
-Question 4 What is the customer count and percentage of customers who have churned rounded to 1 decimal place?
+##### Question 4 What is the customer count and percentage of customers who have churned rounded to 1 decimal place?
 
 ```sql
 with base_tb as(
@@ -69,7 +163,7 @@ from base_tb;
 ![image](https://user-images.githubusercontent.com/89623051/142485362-cb7aee3e-a786-4472-bbee-4b17a8e1d605.png)
 
 
-Question 5 How many customers have churned straight after their initial free trial - what percentage is this rounded to 1 decimal place?
+##### Question 5 How many customers have churned straight after their initial free trial - what percentage is this rounded to 1 decimal place?
 
 ```sql
 with base as(
@@ -82,7 +176,7 @@ from base where rank_plan = 2
 ```
 ![image](https://user-images.githubusercontent.com/89623051/142485466-394be342-71be-4a18-8214-e56f39b1de6a.png)
 
-6. What is the number and percentage of customer plans after their initial free trial?
+##### 6. What is the number and percentage of customer plans after their initial free trial?
 
 ```sql
 WITH ranked_plans AS (
@@ -100,7 +194,7 @@ ORDER BY plans.plan_id;
 ```
 ![image](https://user-images.githubusercontent.com/89623051/142485681-e3812bbd-c5de-4de9-b57f-fca98248843a.png)
 
---7. What is the customer count and percentage breakdown of all 5 plan_name values at 2020-12-31?
+##### --7. What is the customer count and percentage breakdown of all 5 plan_name values at 2020-12-31?
 
 ```sql
 WITH valid_subscriptions AS (
@@ -125,7 +219,7 @@ group by plan_id
 ```
 ![image](https://user-images.githubusercontent.com/89623051/142485836-50a4f90b-f275-40c2-ae9f-b540126f9197.png)
 
-Question 8 How many customers have upgraded to an annual plan in 2020?
+##### Question 8 How many customers have upgraded to an annual plan in 2020?
 
 ```sql
 WITH valid_subscriptions AS (
@@ -144,7 +238,7 @@ select count(*) as annual_customers from valid_subscriptions where plan_rank = 1
 ```
 ![image](https://user-images.githubusercontent.com/89623051/142486014-2ede96da-8f45-41e7-843f-b98b8c6b2d4a.png)
 
---Question 9 How many days on average does it take for a customer to an annual plan from the day they join Foodie-Fi?
+##### Question 9 How many days on average does it take for a customer to an annual plan from the day they join Foodie-Fi?
 
 ```sql
 with base as (
@@ -160,7 +254,7 @@ select ceiling(avg(lead_start_date - start_date)) as avg_days from base where le
 ```
 ![image](https://user-images.githubusercontent.com/89623051/142486167-c53a4409-d96a-4d6e-ba8e-138162da0baf.png)
 
-Question 11 How many customers downgraded from a pro monthly to a basic monthly plan in 2020? downgraded from 2 to 1
+##### Question 11 How many customers downgraded from a pro monthly to a basic monthly plan in 2020? downgraded from 2 to 1
 
 ```sql
 with base as (select 
@@ -177,7 +271,7 @@ select count(*) from base where lead_plan_id is not null and lead_plan_id = 2 an
 ![image](https://user-images.githubusercontent.com/89623051/142486289-9f6a1666-d2e0-4b39-9164-3c80d4ca0533.png)
 
 -------------------------------------
-Question 10 Can you further breakdown this average value into 30 day periods (i.e. 0-30 days, 31-60 days etc)
+##### Question 10 Can you further breakdown this average value into 30 day periods (i.e. 0-30 days, 31-60 days etc)
 
 ```sql
 CREATE Temp TABLE interval(
@@ -239,14 +333,14 @@ on tb1.month_interval = interval.month_interval
 ![image](https://user-images.githubusercontent.com/89623051/142486674-2d2197bd-e6ed-4f6b-b9ea-04f24881172e.png)
 
 ----------------------------------------------------------------------------------
-Part B Challenge Payment Question
+### Part B Challenge Payment Question
 ----------------------------------------------------------------------------------
 
-The Foodie-Fi team wants you to create a new payments table for the year 2020 that includes amounts paid by each customer in the subscriptions table with the following requirements:
-monthly payments always occur on the same day of month as the original start_date of any monthly paid plan
-upgrades from basic to monthly or pro plans are reduced by the current paid amount in that month and start immediately
-upgrades from pro monthly to pro annual are paid at the end of the current billing period and also starts at the end of the month period
-once a customer churns they will no longer make payments
+##### The Foodie-Fi team wants you to create a new payments table for the year 2020 that includes amounts paid by each customer in the subscriptions table with the following requirements:
+##### monthly payments always occur on the same day of month as the original start_date of any monthly paid plan
+##### upgrades from basic to monthly or pro plans are reduced by the current paid amount in that month and start immediately
+##### upgrades from pro monthly to pro annual are paid at the end of the current billing period and also starts at the end of the month period
+##### once a customer churns they will no longer make payments
 
 ```sql
 with base as (
@@ -261,7 +355,7 @@ select plan_id, lead_plan_id, count(*) from lead_plans group by plan_id, lead_pl
 ![image](https://user-images.githubusercontent.com/89623051/142486899-af18135f-52be-4388-a467-2daa7c43953b.png)
 
 -------------------------------------------
--- case 1: non churn monthly customers
+##### -- case 1: non churn monthly customers
 
 ```sql
 WITH lead_plans AS (
@@ -302,7 +396,7 @@ WINDOW w AS (
 ![image](https://user-images.githubusercontent.com/89623051/142487290-1bc14046-67df-44f1-aef8-8d7c8aa18fc4.png)
 
 -------------------------------------
---case 2 churn customers
+##### --case 2 churn customers
 
 ```sql
 WITH lead_plans AS (
@@ -345,7 +439,7 @@ WINDOW w AS (
 ```
 ![image](https://user-images.githubusercontent.com/89623051/142487467-d5a91175-e7f0-4d27-aae1-193b0e1e05c1.png)
 
--- case 3: customers who move from basic to pro plans
+##### -- case 3: customers who move from basic to pro plans
 
 ```sql
 WITH lead_plans AS (
@@ -384,7 +478,7 @@ WINDOW w AS (
 ![image](https://user-images.githubusercontent.com/89623051/142487611-d874000d-1a1f-4e65-baab-377638730f34.png)
 
 ---------------------------------------------
---case 4: pro monthly customers who move up to annual plans
+##### --case 4: pro monthly customers who move up to annual plans
 
 
 ```sql
@@ -421,7 +515,7 @@ WINDOW w AS (
 ![image](https://user-images.githubusercontent.com/89623051/142487735-e76216be-60b3-4c30-9f6e-020412b3ca9e.png)
 
 ----------------------------------------------------
---case 5: annual_pro_payments, id = 3
+##### --case 5: annual_pro_payments, id = 3
 
 ```sql
 WITH lead_plans AS (
